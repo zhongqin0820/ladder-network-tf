@@ -14,6 +14,10 @@ Ladder network is a deep learning algorithm that combines supervised and unsuper
 
 It was introduced in the paper _[Semi-Supervised Learning with Ladder Network](https://arxiv.org/abs/1507.02672v2)_ by A Rasmus, H Valpola, M Honkala, M Berglund, and T Raiko. NIPS. 2015
 
+# Dataset Covered
+- [x] [MNIST](http://yann.lecun.com/exdb/mnist/)
+- [ ] [Cifar-10](https://www.cs.toronto.edu/~kriz/)
+
 # Requirements
 - Python `v3+`
 - TensorFlow `v1.10+`

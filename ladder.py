@@ -33,10 +33,7 @@ def wi(shape, name):
     return tf.Variable(tf.random_normal(shape, name=name)) / math.sqrt(shape[0])
 
 shapes = list(zip(layer_sizes[:-1], layer_sizes[1:]))  # shapes of linear layers
-# print([s for s in shapes])
-# print(type(shapes[0]))
-# print(shapes[0].shape)
-print(shapes[0])
+
 weights = {'W': [wi(s, "W") for s in shapes],  # Encoder weights
            'V': [wi(s[::-1], "V") for s in shapes],  # Decoder weights
            # batch normalization parameter to shift the normalized value

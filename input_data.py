@@ -2,10 +2,10 @@
 from __future__ import print_function
 import gzip
 import os
-import urllib
+import urllib.request
 
 import numpy
-
+import pdb
 SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
 
 
@@ -15,7 +15,13 @@ def maybe_download(filename, work_directory):
     os.mkdir(work_directory)
   filepath = os.path.join(work_directory, filename)
   if not os.path.exists(filepath):
-    filepath, _ = urllib.urlretrieve(SOURCE_URL + filename, filepath)
+    try:
+        filepath, _ = urllib.request.urlretrieve(SOURCE_URL + filename, filepath)
+    except Exception as e:
+        print(SOURCE_URL + filename)
+        raise e
+    finally:
+        pass
     statinfo = os.stat(filepath)
     print('Succesfully downloaded', filename, statinfo.st_size, 'bytes.')
   return filepath
@@ -153,7 +159,7 @@ class SemiDataSet(object):
         n_from_each_class = n_labeled / n_classes
         i_labeled = []
         for c in range(n_classes):
-            i = indices[y==c][:n_from_each_class]
+            i = indices[y==c][:int(n_from_each_class)]
             i_labeled += list(i)
         l_images = images[i_labeled]
         l_labels = labels[i_labeled]
@@ -201,7 +207,7 @@ def read_data_sets(train_dir, n_labeled = 100, fake_data=False, one_hot=False):
   validation_labels = train_labels[:VALIDATION_SIZE]
   train_images = train_images[VALIDATION_SIZE:]
   train_labels = train_labels[VALIDATION_SIZE:]
-
+  # pdb.set_trace()
   data_sets.train = SemiDataSet(train_images, train_labels, n_labeled)
   data_sets.validation = DataSet(validation_images, validation_labels)
   data_sets.test = DataSet(test_images, test_labels)

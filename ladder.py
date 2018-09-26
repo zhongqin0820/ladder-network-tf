@@ -3,8 +3,9 @@ import input_data
 import math
 import os
 import csv
+import pdb
 from tqdm import tqdm
-
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 layer_sizes = [784, 1000, 500, 250, 250, 250, 10]
 
 L = len(layer_sizes) - 1  # number of layers
@@ -31,8 +32,11 @@ def bi(inits, size, name):
 def wi(shape, name):
     return tf.Variable(tf.random_normal(shape, name=name)) / math.sqrt(shape[0])
 
-shapes = zip(layer_sizes[:-1], layer_sizes[1:])  # shapes of linear layers
-
+shapes = list(zip(layer_sizes[:-1], layer_sizes[1:]))  # shapes of linear layers
+# print([s for s in shapes])
+# print(type(shapes[0]))
+# print(shapes[0].shape)
+print(shapes[0])
 weights = {'W': [wi(s, "W") for s in shapes],  # Encoder weights
            'V': [wi(s[::-1], "V") for s in shapes],  # Decoder weights
            # batch normalization parameter to shift the normalized value
@@ -227,7 +231,7 @@ else:
 print("=== Training ===")
 print("Initial Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False}), "%")
 
-for i in tqdm(range(i_iter, num_iter)):
+for i in tqdm(range(int(i_iter), int(num_iter))):
     images, labels = mnist.train.next_batch(batch_size)
     sess.run(train_step, feed_dict={inputs: images, outputs: labels, training: True})
     if (i > 1) and ((i+1) % (num_iter/num_epochs) == 0):
@@ -238,12 +242,13 @@ for i in tqdm(range(i_iter, num_iter)):
             ratio = 1.0 * (num_epochs - (epoch_n+1))  # epoch_n + 1 because learning rate is set for next epoch
             ratio = max(0, ratio / (num_epochs - decay_after))
             sess.run(learning_rate.assign(starter_learning_rate * ratio))
-        saver.save(sess, 'checkpoints/model.ckpt', epoch_n)
+        saver.save(sess, 'checkpoints/model.ckpt', int(epoch_n))
+        # pdb.set_trace()
         # print "Epoch ", epoch_n, ", Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs:mnist.test.labels, training: False}), "%"
-        with open('train_log', 'ab') as train_log:
+        with open('train_log', 'a+', newline='') as train_log:
             # write test accuracy to file "train_log"
             train_log_w = csv.writer(train_log)
-            log_i = [epoch_n] + sess.run([accuracy], feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False})
+            log_i = [int(epoch_n)] +sess.run([accuracy], feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False})
             train_log_w.writerow(log_i)
 
 print("Final Accuracy: ", sess.run(accuracy, feed_dict={inputs: mnist.test.images, outputs: mnist.test.labels, training: False}), "%")

@@ -3,10 +3,10 @@ from __future__ import print_function
 import gzip
 import os
 import urllib.request
-
 import numpy
 import pdb
 SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
+import cifar10
 
 
 def maybe_download(filename, work_directory):
@@ -89,9 +89,11 @@ class DataSet(object):
 
       # Convert shape from [num examples, rows, columns, depth]
       # to [num examples, rows*columns] (assuming depth == 1)
-      assert images.shape[3] == 1
-      images = images.reshape(images.shape[0],
-                              images.shape[1] * images.shape[2])
+      print(images.shape)
+      if len(images.shape) > 2:
+          assert images.shape[3] == 1
+          images = images.reshape(images.shape[0],
+                                  images.shape[1] * images.shape[2])
       # Convert from [0, 255] -> [0.0, 1.0].
       images = images.astype(numpy.float32)
       images = numpy.multiply(images, 1.0 / 255.0)
@@ -207,9 +209,30 @@ def read_data_sets(train_dir, n_labeled = 100, fake_data=False, one_hot=False):
   validation_labels = train_labels[:VALIDATION_SIZE]
   train_images = train_images[VALIDATION_SIZE:]
   train_labels = train_labels[VALIDATION_SIZE:]
-  # pdb.set_trace()
+
   data_sets.train = SemiDataSet(train_images, train_labels, n_labeled)
   data_sets.validation = DataSet(validation_images, validation_labels)
   data_sets.test = DataSet(test_images, test_labels)
 
+  return data_sets
+
+def read_cifar10(train_dir, n_labeled = 100, fake_data=False, one_hot=False):
+  class DataSets(object):
+    pass
+  data_sets = DataSets()
+  if fake_data:
+    data_sets.train = DataSet([], [], fake_data=True)
+    data_sets.validation = DataSet([], [], fake_data=True)
+    data_sets.test = DataSet([], [], fake_data=True)
+    return data_sets
+  cifar = cifar10.Corpus()
+  train_images = cifar.train_images
+  train_labels = dense_to_one_hot(cifar.train_labels)
+  validation_images = cifar.valid_images
+  validation_labels = dense_to_one_hot(cifar.valid_labels)
+  test_images = cifar.test_images
+  test_labels = dense_to_one_hot(cifar.test_labels)
+  data_sets.train = SemiDataSet(train_images, train_labels, n_labeled)
+  data_sets.validation = DataSet(validation_images, validation_labels)
+  data_sets.test = DataSet(test_images, test_labels)
   return data_sets
